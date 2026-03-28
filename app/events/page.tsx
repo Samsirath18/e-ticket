@@ -5,7 +5,7 @@ const events = [
   {
     id: "mode-avion",
     name: "Mode d’Avion",
-    image: "/gazelle.jpeg",
+    image: "/Avion.png",
   },
 ];
 
@@ -17,7 +17,7 @@ export default function EventsPage() {
       <section className="relative h-[60vh] flex items-center justify-center text-center">
 
         <div className="absolute inset-0">
-          <Image src="/cool.jpeg" alt="" fill className="object-cover"/>
+          <Image src="/bio-guera." alt="" fill className="object-cover"/>
           <div className="absolute inset-0 bg-black/70"/>
         </div>
 
@@ -48,6 +48,9 @@ export default function EventsPage() {
 
                 <div className="p-5">
                   <h2 className="text-xl font-bold">{event.name}</h2>
+                  <p className="text-gray-300 text-sm mt-2">
+                  Tous loins des écrans
+                  </p>
                   <p className="text-gray-300 text-sm mt-2">
                     Cliquez pour réserver votre place
                   </p>
