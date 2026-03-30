@@ -43,7 +43,7 @@ export default function About() {
           <div className="flex justify-center">
             <div className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-orange-500 shadow-2xl animate-float hover:scale-110 transition duration-500">
 
-              <Image src="/gazelle.jpeg" alt="" fill className="object-cover"/>
+              <Image src="/oks.jpg" alt="" fill className="object-cover"/>
 
               <div className="absolute inset-0 bg-black/40"></div>
 
@@ -58,7 +58,7 @@ export default function About() {
           <div className="flex justify-center order-2 md:order-1">
             <div className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-yellow-400 shadow-2xl animate-float hover:scale-110 transition duration-500">
 
-              <Image src="/cool.jpeg" alt="" fill className="object-cover"/>
+              <Image src="/pkw.jpg" alt="" fill className="object-cover"/>
               <div className="absolute inset-0 bg-black/40"></div>
 
             </div>
@@ -88,7 +88,7 @@ export default function About() {
           <div className="flex justify-center">
             <div className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-orange-400 shadow-2xl animate-float hover:scale-110 transition duration-500">
 
-              <Image src="/blanc.jpeg" alt="" fill className="object-cover"/>
+              <Image src="/vission.jpg" alt="" fill className="object-cover"/>
               <div className="absolute inset-0 bg-black/40"></div>
 
             </div>

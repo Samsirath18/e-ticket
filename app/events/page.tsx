@@ -17,7 +17,7 @@ export default function EventsPage() {
       <section className="relative h-[60vh] flex items-center justify-center text-center">
 
         <div className="absolute inset-0">
-          <Image src="/bio-guera." alt="" fill className="object-cover"/>
+          <Image src="/cool.jpeg" alt="" fill className="object-cover"/>
           <div className="absolute inset-0 bg-black/70"/>
         </div>
 

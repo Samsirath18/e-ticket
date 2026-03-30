@@ -168,7 +168,7 @@ export default function CheckoutPage() {
     {/* IMAGE */}
     <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-xl animate-fade-in">
       <Image
-        src="/cool.jpeg"
+        src="/bien.jpg"
         alt="faq"
         fill
         className="object-cover"
@@ -196,7 +196,7 @@ export default function CheckoutPage() {
       <div className="bg-white/10 backdrop-blur p-5 rounded-xl hover:scale-105 transition">
         <h3 className="font-bold text-lg">Le paiement est-il sécurisé ?</h3>
         <p className="text-gray-300 mt-2">
-          Oui, toutes les transactions sont sécurisées (le backend sera géré par ton collègue 👍).
+          Oui, toutes les transactions sont sécurisées (le backend sera géré par ton collègue ).
         </p>
       </div>
 
