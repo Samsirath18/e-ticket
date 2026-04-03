@@ -65,13 +65,13 @@ export default function EventsPage() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-20 text-center bg-gradient-to-r from-orange-500 to-black-500">
+      <section className="py-20 text-center bg-gradient-to-r from-yellow-500 to-black-500">
         <h2 className="text-3xl font-bold mb-4">
           Vous organisez un événement ?
         </h2>
 
         <Link href="/checkout">
-          <button className="bg-white text-orange-600 px-8 py-4 rounded-full font-bold hover:scale-110">
+          <button className="bg-white text-yellow-600 px-8 py-4 rounded-full font-bold hover:scale-110">
              Vendre mes tickets
           </button>
         </Link>

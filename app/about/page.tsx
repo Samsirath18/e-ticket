@@ -41,7 +41,7 @@ export default function About() {
           </div>
 
           <div className="flex justify-center">
-            <div className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-orange-500 shadow-2xl animate-float hover:scale-110 transition duration-500">
+            <div className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-yellow-500 shadow-2xl animate-float hover:scale-110 transition duration-500">
 
               <Image src="/oks.jpg" alt="" fill className="object-cover"/>
 
@@ -86,7 +86,7 @@ export default function About() {
           </div>
 
           <div className="flex justify-center">
-            <div className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-orange-400 shadow-2xl animate-float hover:scale-110 transition duration-500">
+            <div className="relative w-72 h-72 rounded-full overflow-hidden border-4 border-yellow-400 shadow-2xl animate-float hover:scale-110 transition duration-500">
 
               <Image src="/vission.jpg" alt="" fill className="object-cover"/>
               <div className="absolute inset-0 bg-black/40"></div>
@@ -99,7 +99,7 @@ export default function About() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-20 text-center bg-gradient-to-r from-orange-500 to-yellow-400 rounded-xl mx-6 mb-10">
+      <section className="py-20 text-center bg-gradient-to-r from-yellow-500 to-orange-400 rounded-xl mx-6 mb-10">
 
         <h2 className="text-3xl md:text-4xl font-bold mb-6">
           Lance ton événement avec e-ticket
@@ -112,13 +112,13 @@ export default function About() {
         <div className="flex flex-col sm:flex-row justify-center gap-4">
 
           <Link href="/checkout">
-            <button className="bg-white text-orange-600 px-10 py-4 rounded-full font-bold hover:scale-110 transition shadow-xl">
+            <button className="bg-white text-yellow-600 px-10 py-4 rounded-full font-bold hover:scale-110 transition shadow-xl">
               Nous contacter
             </button>
           </Link>
 
           <Link href="/events">
-            <button className="border border-white px-10 py-4 rounded-full hover:bg-white hover:text-orange-600 transition">
+            <button className="border border-white px-10 py-4 rounded-full hover:bg-white hover:text-yellow-600 transition">
               Voir les événements
             </button>
           </Link>

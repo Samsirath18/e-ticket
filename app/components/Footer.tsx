@@ -39,7 +39,7 @@ export default function Footer() {
           </p>
 
           <Link href="/checkout">
-            <button className="bg-orange-500 px-6 py-3 rounded-full hover:scale-105 transition">
+            <button className="bg-yellow-500 px-6 py-3 rounded-full hover:scale-105 transition">
               Lancer mon évènement
             </button>
           </Link>

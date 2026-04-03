@@ -36,7 +36,7 @@ export default function TicketsPage() {
             onClick={() => setSelectedTicket("Standard")}
             className={`p-8 rounded-2xl cursor-pointer backdrop-blur border ${
               selectedTicket === "Standard"
-                ? "border-orange-500 scale-105 shadow-2xl"
+                ? "border-yellow-500 scale-105 shadow-2xl"
                 : "border-white/20 hover:scale-105"
             }`}
           >
@@ -55,7 +55,7 @@ export default function TicketsPage() {
             onClick={() => setSelectedTicket("VIP")}
             className={`p-8 rounded-2xl cursor-pointer backdrop-blur border ${
               selectedTicket === "VIP"
-                ? "border-orange-500 scale-105 shadow-2xl"
+                ? "border-yellow-500 scale-105 shadow-2xl"
                 : "border-white/20 hover:scale-105"
             }`}
           >
@@ -82,7 +82,7 @@ export default function TicketsPage() {
 
             <button
               onClick={() => router.push(`/checkout?type=${selectedTicket}&qty=${quantity}`)}
-              className="bg-orange-500 px-6 py-3 rounded-full"
+              className="bg-yellow-500 px-6 py-3 rounded-full"
             >
               Continuer
             </button>

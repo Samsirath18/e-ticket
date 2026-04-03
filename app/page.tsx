@@ -55,7 +55,7 @@ export default function Home() {
 
           <div className="flex gap-4 flex-wrap justify-center">
             <Link href="/events">
-              <button className="bg-orange-500 px-8 py-4 rounded-full font-bold hover:scale-110 transition shadow-xl">
+              <button className="bg-yellow-500 px-8 py-4 rounded-full font-bold hover:scale-110 transition shadow-xl">
                 Voir les événements
               </button>
             </Link>
@@ -89,7 +89,7 @@ export default function Home() {
         </div>
 
         <Link href="/events">
-          <button className="mt-10 bg-orange-500 px-8 py-4 rounded-full font-bold hover:scale-105">
+          <button className="mt-10 bg-yellow-500 px-8 py-4 rounded-full font-bold hover:scale-105">
             Explorer les événements
           </button>
         </Link>
@@ -123,7 +123,7 @@ export default function Home() {
         </div>
 
         <Link href="/events">
-          <button className="mt-12 bg-orange-500 px-8 py-4 rounded-full font-bold hover:scale-110">
+          <button className="mt-12 bg-yellow-500 px-8 py-4 rounded-full font-bold hover:scale-110">
              Voir tous les événements
           </button>
         </Link>
@@ -149,14 +149,14 @@ export default function Home() {
         </div>
 
         <Link href="/tickets">
-          <button className="mt-10 bg-orange-500 px-8 py-4 rounded-full font-bold">
+          <button className="mt-10 bg-yellow-500 px-8 py-4 rounded-full font-bold">
              Réserver maintenant
           </button>
         </Link>
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-20 text-center bg-gradient-to-r from-orange-500 to-black-500">
+      <section className="py-20 text-center bg-gradient-to-r from-yellow-500 to-black-500">
   <h2 className="text-4xl font-bold mb-6">
     Lance ton événement avec e-ticket 
   </h2>
@@ -169,7 +169,7 @@ export default function Home() {
 
     {/* CTA PRINCIPAL */}
     <Link href="/checkout">
-      <button className="bg-white text-orange-600 px-10 py-5 rounded-full font-bold hover:scale-110 transition shadow-xl">
+      <button className="bg-white text-yellow-600 px-10 py-5 rounded-full font-bold hover:scale-110 transition shadow-xl">
         Nous contacter
       </button>
     </Link>

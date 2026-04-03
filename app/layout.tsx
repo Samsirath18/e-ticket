@@ -14,12 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Mode d'Avion",
-  description: "Événement entrepreneurial",
- icons: {
-    icon: "/MAvion08.png",
+  title: "e-ticket",
+  description: "Plateforme de vente de tickets",
+  icons: {
+    icon: "/tik.png",
   },
-
 };
 
 export default function RootLayout({

@@ -55,3 +55,9 @@ body {
 .animate-slide {
   animation: slide-up 0.8s ease-out;
 }
+
+iframe {
+  display: none !important;
+}
+
+

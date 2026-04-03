@@ -79,7 +79,7 @@ export default function CheckoutPage() {
               type="text"
               placeholder="Nom complet"
               required
-              className="w-full p-3 rounded bg-black/50 border border-white/20 focus:border-orange-500 outline-none"
+              className="w-full p-3 rounded bg-black/50 border border-white/20 focus:border-yellow-500 outline-none"
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
 
@@ -95,14 +95,14 @@ export default function CheckoutPage() {
               type="tel"
               placeholder="Téléphone (+22901...)"
               required
-              className="w-full p-3 rounded bg-black/50 border border-white/20 focus:border-orange-500 outline-none"
+              className="w-full p-3 rounded bg-black/50 border border-white/20 focus:border-yellow-500 outline-none"
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 py-3 rounded-full font-bold hover:scale-105 transition disabled:opacity-50"
+              className="w-full bg-yellow-500 py-3 rounded-full font-bold hover:scale-105 transition disabled:opacity-50"
             >
               {loading ? "Traitement..." : " Payer maintenant"}
             </button>
@@ -141,7 +141,7 @@ export default function CheckoutPage() {
 
             <div className="flex justify-between items-center">
               <span className="text-lg font-bold text-white">Total</span>
-              <span className="text-2xl font-bold text-orange-500">
+              <span className="text-2xl font-bold text-yellow-500">
                 {total.toLocaleString()} XOF
               </span>
             </div>
