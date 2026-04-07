@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ─────────────────────────────────────────────
+enum Group {
+  A
+  B
+  C
+  D
+  E
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum Color {
+  ORANGE
+  BLEU
+  BLANC
+  JAUNE
+  ROUGE
+}
+
+// ─── MODELS ────────────────────────────────────────────
+
+model User {
+  id               String   @id @default(uuid())
+  name             String?
+  email            String   @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tickets          Ticket[]
+  validatedTickets Ticket[] @relation("Validator")
+}
+
+model Event {
+  id            String   @id @default(uuid())
+  name          String
+  date          DateTime
+  location      String?
+
+  //  LIMITES IMPORTANTES
+  totalTickets  Int      @default(150)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tickets       Ticket[]
+  payments      Payment[]
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  amount            Float
+  currency          String        @default("XOF")
+
+  //  FedaPay
+  transactionId     String        @unique
+  status            PaymentStatus @default(PENDING)
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  tickets           Ticket[]
+  event             Event         @relation(fields: [eventId], references: [id])
+  eventId           String
+}
+
+model Ticket {
+  id            String       @id @default(uuid())
+  uuid          String       @unique
+  qrSignature   String
+  status        TicketStatus @default(VALID)
+
+  fullName      String
+  email         String
+  phone         String
+
+  //  IMPORTANT (ENUM)
+  color         Color
+  group         Group
+
+  purchaseDate  DateTime     @default(now())
+  validatedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user          User?        @relation(fields: [userId], references: [id])
+  userId        String?
+
+  event         Event        @relation(fields: [eventId], references: [id])
+  eventId       String
+
+  payment       Payment?     @relation(fields: [paymentId], references: [id])
+  paymentId     String?
+
+  validatedBy   User?        @relation("Validator", fields: [validatedById], references: [id])
+  validatedById String?
+
+  @@index([eventId])
+  @@index([color])
+  @@index([email])
+}
