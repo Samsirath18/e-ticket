@@ -38,7 +38,7 @@ export default function Footer() {
             Vendez vos tickets facilement sur e-ticket
           </p>
 
-          <Link href="/checkout">
+          <Link href="/lancer">
             <button className="bg-yellow-500 px-6 py-3 rounded-full hover:scale-105 transition">
               Lancer mon évènement
             </button>
