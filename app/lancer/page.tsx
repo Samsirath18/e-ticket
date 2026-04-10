@@ -24,9 +24,15 @@ export default function Lancer() {
   function handleSubmit(e: any) {
     e.preventDefault();
 
+    // ✅ VALIDATION
+    if (!form.nom || !form.prenom || !form.email || !form.event || !form.phone || !form.message) {
+      setStatus("error");
+      return;
+    }
+
     emailjs.send(
       "service_8y67a8i",
-      "template_u6slwbj", // ton template lancer
+      "template_u6slwbj",
       {
         name: form.nom + " " + form.prenom,
         email: form.email,
@@ -38,6 +44,16 @@ export default function Lancer() {
     )
     .then(() => {
       setStatus("success");
+
+      // ✅ RESET FORM
+      setForm({
+        nom: "",
+        prenom: "",
+        email: "",
+        event: "",
+        phone: "",
+        message: "",
+      });
     })
     .catch(() => {
       setStatus("error");
@@ -64,7 +80,6 @@ export default function Lancer() {
             Remplissez ce formulaire et publiez votre événement en quelques minutes
           </p>
 
-          {/* STATUS */}
           {status === "success" && (
             <p className="text-green-400 text-center">
               Demande envoyée avec succès ✅
@@ -73,22 +88,22 @@ export default function Lancer() {
 
           {status === "error" && (
             <p className="text-red-400 text-center">
-              Une erreur est survenue ❌
+              Veuillez remplir tous les champs ❌
             </p>
           )}
 
           <div className="grid md:grid-cols-2 gap-4">
 
-            <input name="nom" placeholder="Nom" onChange={handleChange} className="input-style"/>
-            <input name="prenom" placeholder="Prénom" onChange={handleChange} className="input-style"/>
+            <input name="nom" value={form.nom} onChange={handleChange} placeholder="Nom" className="input-style"/>
+            <input name="prenom" value={form.prenom} onChange={handleChange} placeholder="Prénom" className="input-style"/>
 
           </div>
 
-          <input name="email" placeholder="Email" onChange={handleChange} className="input-style"/>
-          <input name="event" placeholder="Nom de l'événement" onChange={handleChange} className="input-style"/>
-          <input name="phone" placeholder="Téléphone (+229...)" onChange={handleChange} className="input-style"/>
+          <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="input-style"/>
+          <input name="event" value={form.event} onChange={handleChange} placeholder="Nom de l'événement" className="input-style"/>
+          <input name="phone" value={form.phone} onChange={handleChange} placeholder="Téléphone (+229...)" className="input-style"/>
 
-          <textarea name="message" placeholder="Décrivez votre événement..." onChange={handleChange} rows={4} className="input-style"/>
+          <textarea name="message" value={form.message} onChange={handleChange} placeholder="Décrivez votre événement..." rows={4} className="input-style"/>
 
           <button className="w-full bg-yellow-500 text-black py-3 rounded-full font-bold hover:scale-105 transition shadow-xl">
             Envoyer mon événement

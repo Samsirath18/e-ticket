@@ -68,71 +68,59 @@ export default function Navbar() {
     onClick={() => setOpen(false)}
   />
 )}
+{/* MOBILE MENU SIMPLE */}
+{open && (
+  <div className="md:hidden absolute top-full left-0 w-full bg-white text-black border-t border-gray-200 shadow-md">
 
-{/* MOBILE MENU */}
-<div
-  className={`fixed top-0 right-0 h-full w-[85%] bg-gradient-to-b from-black via-gray-900 to-black z-50 transition-transform duration-500 shadow-2xl
-  ${open ? "translate-x-0" : "translate-x-full"}`}
->
+    <div className="flex flex-col p-5 gap-4 text-lg font-medium">
 
-  {/* HEADER */}
-  <div className="flex justify-between items-center p-6 border-b border-yellow-500/20">
-    <Image src="/GO-ticket.png" alt="logo" width={100} height={50} />
-    <button onClick={() => setOpen(false)} className="text-2xl text-white hover:text-yellow-400">
-      ✕
-    </button>
-  </div>
+      <Link
+        href="/events"
+        onClick={() => setOpen(false)}
+        className={
+          pathname === "/events"
+            ? "text-yellow-500 font-bold"
+            : "text-gray-800"
+        }
+      >
+        Événements
+      </Link>
 
-  {/* MENU */}
-  <div className="flex flex-col gap-4 p-6 pt-12 text-lg font-medium">
+      <Link
+        href="/about"
+        onClick={() => setOpen(false)}
+        className={
+          pathname === "/about"
+            ? "text-yellow-500 font-bold"
+            : "text-gray-800"
+        }
+      >
+        À propos
+      </Link>
 
-    <Link
-      href="/events"
-      onClick={() => setOpen(false)}
-      className={`px-4 py-3 rounded-lg transition ${
-        pathname === "/events"
-          ? "bg-yellow-500 text-black font-bold shadow-lg"
-          : "text-gray-300 hover:bg-white/5 hover:text-yellow-400"
-      }`}
-    >
-       Événements
-    </Link>
+      <Link
+        href="/checkout"
+        onClick={() => setOpen(false)}
+        className={
+          pathname === "/checkout"
+            ? "text-yellow-500 font-bold"
+            : "text-gray-800"
+        }
+      >
+        Contact
+      </Link>
 
-    <Link
-      href="/about"
-      onClick={() => setOpen(false)}
-      className={`px-4 py-3 rounded-lg transition ${
-        pathname === "/about"
-          ? "bg-yellow-500 text-black font-bold shadow-lg"
-          : "text-gray-300 hover:bg-white/5 hover:text-yellow-400"
-      }`}
-    >
-      À propos
-    </Link>
-
-    <Link
-      href="/checkout"
-      onClick={() => setOpen(false)}
-      className={`px-4 py-3 rounded-lg transition ${
-        pathname === "/checkout"
-          ? "bg-yellow-500 text-black font-bold shadow-lg"
-          : "text-gray-300 hover:bg-white/5 hover:text-yellow-400"
-      }`}
-    >
-      Contact
-    </Link>
-
-    {/* CTA */}
-    <div className="mt-6">
+      {/* CTA */}
       <Link href="/lancer" onClick={() => setOpen(false)}>
-        <button className="bg-yellow-500 w-full py-3 rounded-full font-bold text-black shadow-xl hover:scale-105 transition">
+        <button className="mt-3 w-full bg-yellow-500 text-black py-3 rounded-full font-bold">
           Lancer mon événement
         </button>
       </Link>
+
     </div>
 
   </div>
-</div>
+)}
     </nav>
   );
 }

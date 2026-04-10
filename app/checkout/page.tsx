@@ -23,6 +23,12 @@ export default function Contact() {
   function handleSubmit(e: any) {
     e.preventDefault();
 
+    // ✅ VALIDATION
+    if (!form.nom || !form.prenom || !form.email || !form.phone || !form.message) {
+      setStatus("error");
+      return;
+    }
+
     emailjs.send(
       "service_zskx37u",
       "template_wrjdl8h",
@@ -37,6 +43,15 @@ export default function Contact() {
     )
     .then(() => {
       setStatus("success");
+
+      // ✅ RESET FORM
+      setForm({
+        nom: "",
+        prenom: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
     })
     .catch(() => {
       setStatus("error");
@@ -60,7 +75,6 @@ export default function Contact() {
             Contactez-nous
           </h1>
 
-          {/* MESSAGE STATUS */}
           {status === "success" && (
             <p className="text-green-400 text-center mb-4">
               Message envoyé avec succès ✅
@@ -69,18 +83,21 @@ export default function Contact() {
 
           {status === "error" && (
             <p className="text-red-400 text-center mb-4">
-              Une erreur est survenue ❌
+              Veuillez remplir tous les champs ❌
             </p>
           )}
 
           <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-6">
 
-            <input name="nom" placeholder="Nom" onChange={handleChange} className="bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 focus:border-yellow-400 focus:outline-none"/>
-            <input name="prenom" placeholder="Prénom" onChange={handleChange} className="bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 focus:border-yellow-400 focus:outline-none"/>
-            <input name="email" placeholder="Email" onChange={handleChange} className="bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 focus:border-yellow-400 focus:outline-none"/>
-            <input name="phone" placeholder="Téléphone" onChange={handleChange} className="bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 focus:border-yellow-400 focus:outline-none"/>
+            <input name="nom" value={form.nom} onChange={handleChange} placeholder="Nom" className="bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 focus:border-yellow-400 focus:outline-none"/>
 
-            <textarea name="message" placeholder="Votre message..." onChange={handleChange} className="md:col-span-2 bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 h-32 focus:border-yellow-400 focus:outline-none"/>
+            <input name="prenom" value={form.prenom} onChange={handleChange} placeholder="Prénom" className="bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 focus:border-yellow-400 focus:outline-none"/>
+
+            <input name="email" value={form.email} onChange={handleChange} placeholder="Email" className="bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 focus:border-yellow-400 focus:outline-none"/>
+
+            <input name="phone" value={form.phone} onChange={handleChange} placeholder="Téléphone" className="bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 focus:border-yellow-400 focus:outline-none"/>
+
+            <textarea name="message" value={form.message} onChange={handleChange} placeholder="Votre message..." className="md:col-span-2 bg-transparent border border-yellow-200/40 text-white placeholder-gray-200 rounded-xl p-3 h-32 focus:border-yellow-400 focus:outline-none"/>
 
             <button className="md:col-span-2 bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-3 rounded-xl transition">
               Envoyer
