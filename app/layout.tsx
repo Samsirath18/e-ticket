@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "e-ticket",
+  title: "Go-TICKET",
   description: "Plateforme de vente de tickets",
   icons: {
-    icon: "/tik.png",
+    icon: "/Go-ticket.png",
   },
 };
 

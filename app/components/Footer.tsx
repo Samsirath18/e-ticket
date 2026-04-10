@@ -13,7 +13,7 @@ export default function Footer() {
        <Link href="/" className="flex items-center gap-2">
         <div className="relative w-32 h-32">
   <Image
-    src="/tik.png"
+    src="/Go-ticket.png"
     alt="logo"
     fill
     className="object-contain"
@@ -44,7 +44,11 @@ export default function Footer() {
             </button>
           </Link>
         </div>
+ 
 
+             <div className="text-center text-gray-500 mt-10 text-sm border-t border-white/10 pt-6">
+            © {new Date().getFullYear()} GO-TICKET. Tous droits réservés.
+            </div>
       </div>
 
     </footer>

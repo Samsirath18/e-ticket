@@ -17,7 +17,7 @@ export default function Navbar() {
       {/* LOGO */}
       <Link href="/" className="flex items-center">
         <div className="relative w-30 h-30">
-          <Image src="/tik.png" alt="logo" fill className="object-contain" />
+          <Image src="/GO-ticket.png" alt="logo" fill className="object-contain" />
         </div>
       </Link>
 
@@ -62,33 +62,77 @@ export default function Navbar() {
       </button>
 
       {/* OVERLAY */}
-      {open && (
-        <div className="fixed inset-0 bg-black/80 z-40" onClick={() => setOpen(false)} />
-      )}
+{open && (
+  <div
+    className="fixed inset-0 bg-black/95 "
+    onClick={() => setOpen(false)}
+  />
+)}
 
-      {/* MOBILE MENU */}
-      <div className={`fixed top-0 right-0 h-full w-[80%] bg-black/95 backdrop-blur-xl z-50 transition-transform duration-500
-        ${open ? "translate-x-0" : "translate-x-full"}`}>
+{/* MOBILE MENU */}
+<div
+  className={`fixed top-0 right-0 h-full w-[85%] bg-gradient-to-b from-black via-gray-900 to-black z-50 transition-transform duration-500 shadow-2xl
+  ${open ? "translate-x-0" : "translate-x-full"}`}
+>
 
-        <div className="flex justify-between items-center p-6 border-b border-white/10">
-          <Image src="/tik.png" alt="logo" width={100} height={50} />
-          <button onClick={() => setOpen(false)}>✕</button>
-        </div>
+  {/* HEADER */}
+  <div className="flex justify-between items-center p-6 border-b border-yellow-500/20">
+    <Image src="/GO-ticket.png" alt="logo" width={100} height={50} />
+    <button onClick={() => setOpen(false)} className="text-2xl text-white hover:text-yellow-400">
+      ✕
+    </button>
+  </div>
 
-        <div className="flex flex-col gap-6 p-6 text-lg">
+  {/* MENU */}
+  <div className="flex flex-col gap-4 p-6 pt-12 text-lg font-medium">
 
-          <Link href="/events" onClick={() => setOpen(false)}>Événements</Link>
-          <Link href="/about" onClick={() => setOpen(false)}>À propos</Link>
-          <Link href="/checkout" onClick={() => setOpen(false)}>Contact</Link>
+    <Link
+      href="/events"
+      onClick={() => setOpen(false)}
+      className={`px-4 py-3 rounded-lg transition ${
+        pathname === "/events"
+          ? "bg-yellow-500 text-black font-bold shadow-lg"
+          : "text-gray-300 hover:bg-white/5 hover:text-yellow-400"
+      }`}
+    >
+       Événements
+    </Link>
 
-          <Link href="/lancer" onClick={() => setOpen(false)}>
-            <button className="bg-yellow-500 w-full py-3 rounded-full font-bold text-black">
-              Lancer mon événement
-            </button>
-          </Link>
+    <Link
+      href="/about"
+      onClick={() => setOpen(false)}
+      className={`px-4 py-3 rounded-lg transition ${
+        pathname === "/about"
+          ? "bg-yellow-500 text-black font-bold shadow-lg"
+          : "text-gray-300 hover:bg-white/5 hover:text-yellow-400"
+      }`}
+    >
+      À propos
+    </Link>
 
-        </div>
-      </div>
+    <Link
+      href="/checkout"
+      onClick={() => setOpen(false)}
+      className={`px-4 py-3 rounded-lg transition ${
+        pathname === "/checkout"
+          ? "bg-yellow-500 text-black font-bold shadow-lg"
+          : "text-gray-300 hover:bg-white/5 hover:text-yellow-400"
+      }`}
+    >
+      Contact
+    </Link>
+
+    {/* CTA */}
+    <div className="mt-6">
+      <Link href="/lancer" onClick={() => setOpen(false)}>
+        <button className="bg-yellow-500 w-full py-3 rounded-full font-bold text-black shadow-xl hover:scale-105 transition">
+          Lancer mon événement
+        </button>
+      </Link>
+    </div>
+
+  </div>
+</div>
     </nav>
   );
 }

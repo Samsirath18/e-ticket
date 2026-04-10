@@ -11,7 +11,7 @@ export default function About() {
       <section className="relative h-[70vh] flex items-center justify-center text-center overflow-hidden">
 
         <div className="absolute inset-0">
-          <Image src="/cket.png" alt="" fill className="object-cover" />
+          <Image src="/vanta.png" alt="" fill className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-yellow-500/20" />
         </div>
 
