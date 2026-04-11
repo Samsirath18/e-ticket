@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GO-TICKET
 
-## Getting Started
+Plateforme de billetterie construite avec Next.js, Prisma, PostgreSQL et FedaPay.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router
+- React 19
+- Prisma 7 avec adaptateur PostgreSQL
+- PostgreSQL
+- FedaPay pour le paiement
+- Resend pour les emails
+
+## Variables d'environnement
+
+Copier `.env.example` vers `.env` puis renseigner au minimum:
+
+- `DATABASE_URL`
+- `QR_SECRET`
+- `FEDAPAY_API_KEY`
+- `FEDAPAY_ENV`
+- `APP_URL`
+- `RESEND_API_KEY`
+- `EMAIL_FROM`
+
+Variables recommandees pour la securite:
+
+- `FEDAPAY_WEBHOOK_SECRET`
+- `CONTACT_TO`
+- `ADMIN_API_TOKEN`
+- `SCAN_API_TOKEN`
+
+## Demarrage local
+
+1. Lancer PostgreSQL:
+
+```bash
+docker compose up -d
+```
+
+2. Installer les dependances:
+
+```bash
+npm install
+```
+
+3. Appliquer les migrations:
+
+```bash
+npm run prisma:migrate
+```
+
+4. Inserer l'evenement par defaut:
+
+```bash
+npm run db:seed
+```
+
+5. Demarrer le projet:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Routes utiles
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/events` liste les evenements
+- `/tickets/mode-avion` ouvre le tunnel d'achat
+- `/api/payments/create` cree une transaction FedaPay
+- `/api/webhook/fedapay` traite la confirmation de paiement
+- `/api/tickets/verify` verifie et consomme un QR code
+- `/api/admin/stats` statistiques admin
+- `/api/admin/tickets` liste admin des tickets
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Notes de securite
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Les routes admin utilisent `ADMIN_API_TOKEN` via `Authorization: Bearer ...`
+- La route de scan utilise `SCAN_API_TOKEN` ou retombe sur `ADMIN_API_TOKEN`
+- En production, configure `FEDAPAY_WEBHOOK_SECRET` pour verifier la signature du webhook

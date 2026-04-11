@@ -1,220 +1,161 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
 import Image from "next/image";
+import { useState } from "react";
 
-const PRICES = {
-  Standard: 5000,
-  VIP: 15000,
+type ContactFormState = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  message: string;
 };
 
-export default function CheckoutPage() {
-  const params = useSearchParams();
-
-  const type = params.get("type") as "Standard" | "VIP";
-  const qty = Number(params.get("qty") || 1);
-
-  const total = type ? PRICES[type] * qty : 0;
-
-  const [form, setForm] = useState({
-    name: "",
+export default function ContactPage() {
+  const [form, setForm] = useState<ContactFormState>({
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
+    message: "",
   });
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle"
+  );
+  const [error, setError] = useState("");
 
-  const [loading, setLoading] = useState(false);
+  function handleChange(
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  }
 
-  const handleSubmit = async (e: any) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setStatus("loading");
+    setError("");
 
-    setLoading(true);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: `${form.firstName} ${form.lastName}`.trim(),
+          email: form.email,
+          phone: form.phone,
+          message: form.message,
+        }),
+      });
 
-    const orderData = {
-      ...form,
-      type,
-      qty,
-      total,
-    };
+      const data = (await response.json()) as { message?: string };
 
-    console.log("Commande :", orderData);
+      if (!response.ok) {
+        throw new Error(data.message || "Impossible d'envoyer votre message.");
+      }
 
-    // 👉 BACKEND ICI (soulé)
-    // await fetch("/api/order", {...})
-
-    setTimeout(() => {
-      setLoading(false);
-      alert("Paiement simulé ✅");
-    }, 1500);
-  };
+      setStatus("success");
+      setForm({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+    } catch (submitError) {
+      console.error(submitError);
+      setStatus("error");
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Une erreur est survenue."
+      );
+    }
+  }
 
   return (
-    <main className="min-h-screen text-white relative">
-
-      {/* BACKGROUND */}
+    <main className="relative flex min-h-screen items-center justify-center px-6 py-16">
       <div className="absolute inset-0">
-        <Image src="/evet.jpeg" alt="" fill className="object-cover"/>
-        <div className="absolute inset-0 bg-black/80"/>
+        <Image
+          src="/phone.jpg"
+          alt="Contact"
+          fill
+          className="object-cover opacity-10"
+        />
       </div>
 
-      <div className="relative z-10 px-6 py-20 max-w-6xl mx-auto">
+      <div className="absolute inset-0 bg-black/20" />
 
-        <h1 className="text-4xl font-bold text-center mb-12">
-        Finaliser votre commande
-        </h1>
+      <div className="relative z-10 w-full max-w-4xl">
+        <div className="rounded-2xl border border-yellow-300/40 bg-white/10 p-10 shadow-xl backdrop-blur-xl">
+          <h1 className="mb-8 text-center text-3xl font-bold text-white">
+            Contactez-nous
+          </h1>
 
-        <div className="grid md:grid-cols-2 gap-10">
+          {status === "success" && (
+            <p className="mb-4 text-center text-green-400">
+              Message envoye avec succes.
+            </p>
+          )}
 
-          {/* FORMULAIRE */}
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white/10 backdrop-blur p-8 rounded-2xl space-y-4 border border-white/20"
-          >
+          {status === "error" && (
+            <p className="mb-4 text-center text-red-400">{error}</p>
+          )}
 
-            <h2 className="text-xl font-bold mb-4">
-              Vos informations
-            </h2>
-
+          <form onSubmit={handleSubmit} className="grid gap-6 md:grid-cols-2">
             <input
-              type="text"
-              placeholder="Nom complet"
-              required
-              className="w-full p-3 rounded bg-black/50 border border-white/20 focus:border-yellow-500 outline-none"
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              name="lastName"
+              placeholder="Nom"
+              value={form.lastName}
+              onChange={handleChange}
+              className="rounded-xl border border-yellow-200/40 bg-transparent p-3 text-white placeholder-gray-200 focus:border-yellow-400 focus:outline-none"
             />
-
             <input
+              name="firstName"
+              placeholder="Prenom"
+              value={form.firstName}
+              onChange={handleChange}
+              className="rounded-xl border border-yellow-200/40 bg-transparent p-3 text-white placeholder-gray-200 focus:border-yellow-400 focus:outline-none"
+            />
+            <input
+              name="email"
               type="email"
               placeholder="Email"
-              required
-              className="w-full p-3 rounded bg-black/50 border border-white/20 focus:border-orange-500 outline-none"
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              value={form.email}
+              onChange={handleChange}
+              className="rounded-xl border border-yellow-200/40 bg-transparent p-3 text-white placeholder-gray-200 focus:border-yellow-400 focus:outline-none"
+            />
+            <input
+              name="phone"
+              type="tel"
+              placeholder="Telephone"
+              value={form.phone}
+              onChange={handleChange}
+              className="rounded-xl border border-yellow-200/40 bg-transparent p-3 text-white placeholder-gray-200 focus:border-yellow-400 focus:outline-none"
             />
 
-            <input
-              type="tel"
-              placeholder="Téléphone (+22901...)"
-              required
-              className="w-full p-3 rounded bg-black/50 border border-white/20 focus:border-yellow-500 outline-none"
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            <textarea
+              name="message"
+              placeholder="Votre message..."
+              value={form.message}
+              onChange={handleChange}
+              className="h-32 rounded-xl border border-yellow-200/40 bg-transparent p-3 text-white placeholder-gray-200 focus:border-yellow-400 focus:outline-none md:col-span-2"
             />
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-yellow-500 py-3 rounded-full font-bold hover:scale-105 transition disabled:opacity-50"
+              disabled={status === "loading"}
+              className="rounded-xl bg-yellow-400 py-3 font-bold text-black transition hover:bg-yellow-500 disabled:cursor-not-allowed disabled:bg-yellow-200 md:col-span-2"
             >
-              {loading ? "Traitement..." : " Payer maintenant"}
+              {status === "loading" ? "Envoi..." : "Envoyer"}
             </button>
-
           </form>
-
-          {/*  RÉSUMÉ  */}
-          <div className="bg-white/10 backdrop-blur p-8 rounded-2xl shadow-xl border border-white/20">
-
-            <h2 className="text-xl font-bold mb-6 text-white">
-              Résumé de votre commande
-            </h2>
-
-            <div className="space-y-4 text-gray-300">
-
-              <div className="flex justify-between">
-                <span>Type de ticket</span>
-                <span className="font-semibold text-white">{type}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Quantité</span>
-                <span className="font-semibold text-white">{qty}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Prix unitaire</span>
-                <span className="font-semibold text-white">
-                  {type && PRICES[type].toLocaleString()} XOF
-                </span>
-              </div>
-
-            </div>
-
-            <div className="border-t border-white/20 my-6"></div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-bold text-white">Total</span>
-              <span className="text-2xl font-bold text-yellow-500">
-                {total.toLocaleString()} XOF
-              </span>
-            </div>
-
-            <p className="text-xs text-gray-400 mt-4">
-              ✔ Paiement sécurisé • ✔ Confirmation instantanée
-            </p>
-
-          </div>
-
         </div>
-
       </div>
-
-{/* FAQ */}
-<section className="py-20 px-6 max-w-6xl mx-auto">
-
-  <h2 className="text-4xl font-bold text-center mb-12">
-    Questions fréquentes ❓
-  </h2>
-
-  <div className="grid md:grid-cols-2 gap-10 items-center">
-
-    {/* IMAGE */}
-    <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-xl animate-fade-in">
-      <Image
-        src="/bien.jpg"
-        alt="faq"
-        fill
-        className="object-cover"
-      />
-      <div className="absolute inset-0 bg-black/50"></div>
-    </div>
-
-    {/* QUESTIONS */}
-    <div className="space-y-6">
-
-      <div className="bg-white/10 backdrop-blur p-5 rounded-xl hover:scale-105 transition">
-        <h3 className="font-bold text-lg">Comment acheter un ticket ?</h3>
-        <p className="text-gray-300 mt-2">
-          Choisissez votre événement, sélectionnez votre ticket et suivez les étapes de paiement.
-        </p>
-      </div>
-
-      <div className="bg-white/10 backdrop-blur p-5 rounded-xl hover:scale-105 transition">
-        <h3 className="font-bold text-lg">Comment vendre mes tickets ?</h3>
-        <p className="text-gray-300 mt-2">
-          Contactez-nous via le formulaire et nous vous aidons à publier votre événement.
-        </p>
-      </div>
-
-      <div className="bg-white/10 backdrop-blur p-5 rounded-xl hover:scale-105 transition">
-        <h3 className="font-bold text-lg">Le paiement est-il sécurisé ?</h3>
-        <p className="text-gray-300 mt-2">
-          Oui, toutes les transactions sont sécurisées (le backend sera géré par ton collègue ).
-        </p>
-      </div>
-
-      <div className="bg-white/10 backdrop-blur p-5 rounded-xl hover:scale-105 transition">
-        <h3 className="font-bold text-lg">Puis-je annuler mon ticket ?</h3>
-        <p className="text-gray-300 mt-2">
-          Cela dépend des conditions de l’événement.
-        </p>
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-
-
     </main>
   );
 }

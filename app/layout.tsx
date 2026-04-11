@@ -1,41 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata = {
-  title: "e-ticket",
-  description: "Plateforme de vente de tickets",
+export const metadata: Metadata = {
+  title: "GO-TICKET",
+  description: "Plateforme de vente de tickets au Benin",
   icons: {
-    icon: "/tik.png",
+    icon: "/GO-ticket.png",
   },
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="fr">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="bg-black text-white antialiased">
         <Navbar />
-        {children}
+        <div className="pt-32">{children}</div>
         <Footer />
       </body>
     </html>
   );
-};
-
-
-
+}

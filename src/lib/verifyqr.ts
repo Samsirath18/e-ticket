@@ -1,30 +1,55 @@
-import crypto from "crypto"
+import crypto from "crypto";
 
-const SECRET = process.env.QR_SECRET || "super_secret_key"
+function getQrSecret() {
+  if (process.env.QR_SECRET) {
+    return process.env.QR_SECRET;
+  }
 
-export function verifyQRToken(token: string) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("QR_SECRET is not configured.");
+  }
+
+  return "dev-only-qr-secret";
+}
+
+type ValidQrToken = {
+  valid: true;
+  uuid: string;
+  eventId: string;
+};
+
+type InvalidQrToken = {
+  valid: false;
+};
+
+export function verifyQRToken(token: string): ValidQrToken | InvalidQrToken {
   try {
-    const decoded = JSON.parse(
-      Buffer.from(token, "base64").toString("utf-8")
-    )
+    const decoded = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
+    const { uuid, eventId, signature } = decoded;
 
-    const { uuid, eventId, signature } = decoded
+    if (
+      typeof uuid !== "string" ||
+      typeof eventId !== "string" ||
+      typeof signature !== "string"
+    ) {
+      return { valid: false };
+    }
 
     const expectedSignature = crypto
-      .createHmac("sha256", SECRET)
+      .createHmac("sha256", getQrSecret())
       .update(`${uuid}:${eventId}`)
-      .digest("hex")
+      .digest("hex");
 
     if (signature !== expectedSignature) {
-      return { valid: false }
+      return { valid: false };
     }
 
     return {
       valid: true,
       uuid,
       eventId,
-    }
-  } catch (error) {
-    return { valid: false }
+    };
+  } catch {
+    return { valid: false };
   }
 }
