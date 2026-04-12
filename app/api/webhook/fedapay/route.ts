@@ -10,6 +10,13 @@ import { checkAvailability, ensureEventExists } from "@/src/services/event.servi
 
 export const runtime = "nodejs";
 
+function isSoldOutError(error: unknown) {
+  return (
+    error instanceof Error &&
+    ["EVENT_SOLD_OUT", "COLOR_SOLD_OUT", "GROUP_SOLD_OUT"].includes(error.message)
+  );
+}
+
 type FedaPayWebhookPayload = {
   name?: string;
   entity?: {
@@ -109,56 +116,74 @@ export async function POST(req: Request) {
       );
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const total = await tx.ticket.count({
-        where: { eventId },
-      });
+    let result: { ticket: { id: string }; qrImage: string };
 
-      if (total >= event.totalTickets) {
-        throw new Error("EVENT_SOLD_OUT");
+    try {
+      result = await prisma.$transaction(async (tx) => {
+        const total = await tx.ticket.count({
+          where: { eventId },
+        });
+
+        if (total >= event.totalTickets) {
+          throw new Error("EVENT_SOLD_OUT");
+        }
+
+        const colorCount = await tx.ticket.count({
+          where: { eventId, color },
+        });
+
+        if (colorCount >= eventConfig.maxPerColor) {
+          throw new Error("COLOR_SOLD_OUT");
+        }
+
+        const groupCount = await tx.ticket.count({
+          where: { eventId, group },
+        });
+
+        if (groupCount >= eventConfig.maxPerGroup) {
+          throw new Error("GROUP_SOLD_OUT");
+        }
+
+        const uuid = uuidv4();
+        const payload = generateQRPayload(uuid, eventId);
+        const qrImage = await generateQRCodeImage(payload.token);
+
+        const ticket = await tx.ticket.create({
+          data: {
+            uuid,
+            qrSignature: payload.token,
+            fullName,
+            email,
+            phone,
+            color,
+            group,
+            eventId,
+            paymentId: payment.id,
+          },
+        });
+
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: { status: "SUCCESS" },
+        });
+
+        return { ticket, qrImage };
+      });
+    } catch (transactionError) {
+      if (isSoldOutError(transactionError)) {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: { status: "FAILED" },
+        });
+
+        return NextResponse.json(
+          { error: "Paiement recu mais plus de disponibilite pour ce billet." },
+          { status: 409 }
+        );
       }
 
-      const colorCount = await tx.ticket.count({
-        where: { eventId, color },
-      });
-
-      if (colorCount >= eventConfig.maxPerColor) {
-        throw new Error("COLOR_SOLD_OUT");
-      }
-
-      const groupCount = await tx.ticket.count({
-        where: { eventId, group },
-      });
-
-      if (groupCount >= eventConfig.maxPerGroup) {
-        throw new Error("GROUP_SOLD_OUT");
-      }
-
-      const uuid = uuidv4();
-      const payload = generateQRPayload(uuid, eventId);
-      const qrImage = await generateQRCodeImage(payload.token);
-
-      const ticket = await tx.ticket.create({
-        data: {
-          uuid,
-          qrSignature: payload.token,
-          fullName,
-          email,
-          phone,
-          color,
-          group,
-          eventId,
-          paymentId: payment.id,
-        },
-      });
-
-      await tx.payment.update({
-        where: { id: payment.id },
-        data: { status: "SUCCESS" },
-      });
-
-      return { ticket, qrImage };
-    });
+      throw transactionError;
+    }
 
     try {
       await sendTicketEmail({

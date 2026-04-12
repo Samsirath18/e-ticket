@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import {
+  FedaPayApiError,
   buildConfirmationUrl,
   createFedaPayPaymentLink,
   createFedaPayTransaction,
@@ -7,12 +8,25 @@ import {
 import { getEventConfig } from "@/src/lib/events";
 import { parseTicketPurchaseInput } from "@/src/lib/ticket-input";
 import { prisma } from "@/src/lib/prisma";
+import { checkRateLimit } from "@/src/lib/rate-limit";
 import { checkAvailability, ensureEventExists } from "@/src/services/event.service";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    const rateLimit = checkRateLimit(req, "payments:create", {
+      limit: 8,
+      windowMs: 10 * 60 * 1000,
+    });
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { message: "Trop de tentatives de paiement. Reessayez dans quelques minutes." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const parsed = parseTicketPurchaseInput(body);
 
@@ -92,6 +106,16 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Payment creation failed:", error);
+
+    if (error instanceof FedaPayApiError && error.status === 401) {
+      return NextResponse.json(
+        {
+          message:
+            "Echec d'authentification FedaPay. Verifiez FEDAPAY_API_KEY et FEDAPAY_ENV (sandbox ou live).",
+        },
+        { status: 502 }
+      );
+    }
 
     return NextResponse.json(
       { message: "Impossible de lancer le paiement." },

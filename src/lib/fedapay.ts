@@ -35,8 +35,20 @@ type FedaPayPaymentLinkResponse = {
   url: string;
 };
 
+export class FedaPayApiError extends Error {
+  status: number;
+  body: string;
+
+  constructor(status: number, body: string) {
+    super(`FedaPay API request failed (${status}): ${body}`);
+    this.name = "FedaPayApiError";
+    this.status = status;
+    this.body = body;
+  }
+}
+
 function getFedaPayApiKey() {
-  const apiKey = process.env.FEDAPAY_API_KEY;
+  const apiKey = process.env.FEDAPAY_API_KEY?.trim();
 
   if (!apiKey) {
     throw new Error("FEDAPAY_API_KEY is not configured.");
@@ -45,8 +57,22 @@ function getFedaPayApiKey() {
   return apiKey;
 }
 
+function getFedaPayEnv() {
+  const value = process.env.FEDAPAY_ENV?.trim().toLowerCase();
+
+  if (!value || value === "sandbox" || value === "test") {
+    return "sandbox";
+  }
+
+  if (value === "live" || value === "prod" || value === "production") {
+    return "live";
+  }
+
+  return "sandbox";
+}
+
 function getFedaPayBaseUrl() {
-  return process.env.FEDAPAY_ENV === "live"
+  return getFedaPayEnv() === "live"
     ? "https://api.fedapay.com/v1"
     : "https://sandbox-api.fedapay.com/v1";
 }
@@ -67,9 +93,7 @@ async function fedapayRequest<T>(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(
-      `FedaPay API request failed (${response.status}): ${errorText}`
-    );
+    throw new FedaPayApiError(response.status, errorText);
   }
 
   return (await response.json()) as T;
