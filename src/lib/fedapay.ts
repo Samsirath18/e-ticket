@@ -48,10 +48,15 @@ export class FedaPayApiError extends Error {
 }
 
 function getFedaPayApiKey() {
-  const apiKey = process.env.FEDAPAY_API_KEY?.trim();
+  const apiKey =
+    process.env.FEDAPAY_API_KEY?.trim() ||
+    process.env.FEDAPAY_SECRET_KEY?.trim() ||
+    process.env.FEDAPAY_PRIVATE_KEY?.trim();
 
   if (!apiKey) {
-    throw new Error("FEDAPAY_API_KEY is not configured.");
+    throw new Error(
+      "FedaPay secret key is not configured. Use FEDAPAY_API_KEY, FEDAPAY_SECRET_KEY, or FEDAPAY_PRIVATE_KEY."
+    );
   }
 
   return apiKey;
