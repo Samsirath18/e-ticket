@@ -4,6 +4,7 @@ import {
   buildConfirmationUrl,
   createFedaPayPaymentLink,
   createFedaPayTransaction,
+  getFedaPayCurrencyIso,
 } from "@/src/lib/fedapay";
 import { getEventConfig } from "@/src/lib/events";
 import { parseTicketPurchaseInput } from "@/src/lib/ticket-input";
@@ -12,6 +13,45 @@ import { checkRateLimit } from "@/src/lib/rate-limit";
 import { checkAvailability, ensureEventExists } from "@/src/services/event.service";
 
 export const runtime = "nodejs";
+
+const PHONE_PREFIX_TO_COUNTRY = [
+  { prefix: "+229", country: "bj" },
+  { prefix: "+228", country: "tg" },
+  { prefix: "+225", country: "ci" },
+  { prefix: "+221", country: "sn" },
+  { prefix: "+227", country: "ne" },
+  { prefix: "+224", country: "gn" },
+] as const;
+
+function normalizePhoneNumber(phone: string) {
+  const compact = phone.replace(/[\s()-]/g, "");
+  return compact.startsWith("00") ? `+${compact.slice(2)}` : compact;
+}
+
+function inferPhoneCountry(phone: string) {
+  const match = PHONE_PREFIX_TO_COUNTRY.find(({ prefix }) =>
+    phone.startsWith(prefix)
+  );
+
+  return match?.country ?? "bj";
+}
+
+function splitCustomerName(fullName: string) {
+  const parts = fullName.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) {
+    return { firstname: "", lastname: "" };
+  }
+
+  if (parts.length === 1) {
+    return { firstname: parts[0], lastname: parts[0] };
+  }
+
+  return {
+    firstname: parts[0],
+    lastname: parts.slice(1).join(" "),
+  };
+}
 
 export async function POST(req: Request) {
   try {
@@ -35,6 +75,9 @@ export async function POST(req: Request) {
     }
 
     const { eventId, fullName, email, phone, color, group } = parsed.data;
+    const currencyIso = getFedaPayCurrencyIso();
+    const normalizedPhone = normalizePhoneNumber(phone);
+    const customerName = splitCustomerName(fullName);
     const event = await ensureEventExists(eventId);
     const eventConfig = getEventConfig(eventId);
 
@@ -66,16 +109,17 @@ export async function POST(req: Request) {
     }
 
     const transaction = await createFedaPayTransaction({
-      description: `Ticket ${eventConfig.name}`,
+      description: `Ticket ${eventConfig.name} pour ${email}`,
       amount: eventConfig.amount,
-      callback_url: buildConfirmationUrl(),
-      currency: { iso: "XOF" },
+      callback_url: buildConfirmationUrl(req.url),
+      currency: { iso: currencyIso },
       customer: {
-        firstname: fullName,
+        firstname: customerName.firstname,
+        lastname: customerName.lastname,
         email,
         phone_number: {
-          number: phone,
-          country: "BJ",
+          number: normalizedPhone,
+          country: inferPhoneCountry(normalizedPhone),
         },
       },
       metadata: {
@@ -93,15 +137,15 @@ export async function POST(req: Request) {
     await prisma.payment.create({
       data: {
         amount: eventConfig.amount,
-        currency: "XOF",
-        transactionId: String(transaction.id),
+        currency: currencyIso,
+        transactionId: transaction.id,
         status: "PENDING",
         eventId: event.id,
       },
     });
 
     return NextResponse.json({
-      transactionId: String(transaction.id),
+      transactionId: transaction.id,
       url: paymentLink.url,
     });
   } catch (error) {
@@ -111,7 +155,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           message:
-            "Echec d'authentification FedaPay. Verifiez FEDAPAY_API_KEY et FEDAPAY_ENV (sandbox ou live).",
+            "Echec d'authentification FedaPay. Verifiez FEDA_API_SECRET_KEY et FEDA_ENVIRONMENT.",
         },
         { status: 502 }
       );

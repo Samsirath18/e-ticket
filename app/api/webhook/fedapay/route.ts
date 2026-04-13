@@ -10,6 +10,11 @@ import { checkAvailability, ensureEventExists } from "@/src/services/event.servi
 
 export const runtime = "nodejs";
 
+const FAILURE_EVENTS = new Set([
+  "transaction.declined",
+  "transaction.canceled",
+]);
+
 function isSoldOutError(error: unknown) {
   return (
     error instanceof Error &&
@@ -41,16 +46,45 @@ export async function POST(req: Request) {
       signature
     ) as FedaPayWebhookPayload;
 
+    const transactionId = payload.entity?.id;
+
+    if (!transactionId) {
+      return NextResponse.json(
+        { error: "Webhook payload incomplet." },
+        { status: 400 }
+      );
+    }
+
+    const payment = await prisma.payment.findUnique({
+      where: {
+        transactionId: String(transactionId),
+      },
+    });
+
+    if (!payment) {
+      return NextResponse.json({ error: "Paiement introuvable." }, { status: 404 });
+    }
+
+    if (FAILURE_EVENTS.has(payload.name ?? "")) {
+      if (payment.status !== "SUCCESS") {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: { status: "FAILED" },
+        });
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
     if (payload.name !== "transaction.approved") {
       return NextResponse.json({ received: true });
     }
 
-    const transactionId = payload.entity?.id;
     const metadata = payload.entity?.metadata;
 
-    if (!transactionId || !metadata) {
+    if (!metadata) {
       return NextResponse.json(
-        { error: "Webhook payload incomplet." },
+        { error: "Metadata ticket manquante." },
         { status: 400 }
       );
     }
@@ -71,16 +105,6 @@ export async function POST(req: Request) {
         { error: "Metadata ticket invalide." },
         { status: 400 }
       );
-    }
-
-    const payment = await prisma.payment.findUnique({
-      where: {
-        transactionId: String(transactionId),
-      },
-    });
-
-    if (!payment) {
-      return NextResponse.json({ error: "Paiement introuvable." }, { status: 404 });
     }
 
     if (payment.status === "SUCCESS") {
