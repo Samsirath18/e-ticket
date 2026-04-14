@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import emailjs from "emailjs-com";
+import emailjs from "@emailjs/browser";
 
 export default function Contact() {
 

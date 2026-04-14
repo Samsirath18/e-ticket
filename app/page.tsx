@@ -51,7 +51,7 @@ export default function Home() {
           </p>
 
           <div className="flex gap-4 flex-wrap justify-center">
-            <Link href="/events">
+            <Link href="/checkout">
               <button className="bg-yellow-500 text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition shadow-lg">
                 Nous contacter
               </button>
