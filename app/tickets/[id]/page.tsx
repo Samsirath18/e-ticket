@@ -102,7 +102,14 @@ export default function BuyTicketPage() {
   return (
     <main className="relative flex min-h-screen items-center justify-center px-6 py-20 text-white">
       <div className="absolute inset-0">
-        <Image src="/mel.png" alt="" fill className="object-cover" />
+        <Image
+          src="/mel.png"
+          alt=""
+          fill
+          sizes="100vw"
+          loading="eager"
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-black/70" />
       </div>
 

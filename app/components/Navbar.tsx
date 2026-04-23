@@ -23,6 +23,7 @@ export default function Navbar() {
             src="/GO-ticket.png"
             alt="GO-TICKET"
             fill
+            sizes="144px"
             className="object-contain"
             priority
           />
@@ -75,7 +76,13 @@ export default function Navbar() {
         }`}
       >
         <div className="flex items-center justify-between border-b border-yellow-500/20 p-6">
-          <Image src="/GO-ticket.png" alt="GO-TICKET" width={100} height={50} />
+          <Image
+            src="/GO-ticket.png"
+            alt="GO-TICKET"
+            width={100}
+            height={50}
+            style={{ width: "auto", height: "auto" }}
+          />
           <button
             type="button"
             onClick={() => setOpen(false)}

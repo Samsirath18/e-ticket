@@ -7,6 +7,11 @@ type FedaPayRequestOptions = {
   body?: unknown;
 };
 
+// À ajouter en haut de votre fichier
+type FedaPayResponseWrapper<K extends string, T> = {
+  [P in K]: T;
+};
+
 type FedaPayTransactionPayload = {
   description: string;
   amount: number;
@@ -16,13 +21,14 @@ type FedaPayTransactionPayload = {
   };
   customer: {
     firstname: string;
+    lastname: string;
     email: string;
     phone_number: {
       number: string;
       country: string;
     };
   };
-  metadata: Record<string, unknown>;
+  custom_metadata: Record<string, unknown>;
 };
 
 type FedaPayTransactionResponse = {
@@ -36,17 +42,27 @@ type FedaPayPaymentLinkResponse = {
 };
 
 function getFedaPayApiKey() {
-  const apiKey = process.env.FEDAPAY_API_KEY;
+  const apiKey = process.env.FEDA_API_SECRET_KEY || process.env.FEDAPAY_API_KEY;
 
   if (!apiKey) {
-    throw new Error("FEDAPAY_API_KEY is not configured.");
+    throw new Error("FEDA_API_SECRET_KEY is not configured.");
   }
 
-  return apiKey;
+  return apiKey.trim();
+}
+
+function getFedaPayEnvironment() {
+  const environment = (
+    process.env.FEDA_ENVIRONMENT || process.env.FEDAPAY_ENV || "sandbox"
+  )
+    .trim()
+    .toLowerCase();
+
+  return environment === "live" ? "live" : "sandbox";
 }
 
 function getFedaPayBaseUrl() {
-  return process.env.FEDAPAY_ENV === "live"
+  return getFedaPayEnvironment() === "live"
     ? "https://api.fedapay.com/v1"
     : "https://sandbox-api.fedapay.com/v1";
 }
@@ -65,25 +81,50 @@ async function fedapayRequest<T>(
     cache: "no-store",
   });
 
+  // 1. On récupère le JSON une seule fois
+  const data = await response.json();
+  
+  // 2. Debug (utile pour voir la structure "v1/transaction")
+  console.log("DEBUG FEDAPAY RESPONSE:", JSON.stringify(data, null, 2));
+
+  // 3. Gestion des erreurs
   if (!response.ok) {
-    const errorText = await response.text();
+    // Si ce n'est pas OK, on utilise les données déjà extraites pour le message d'erreur
+    const errorMessage = data.message || JSON.stringify(data);
+
+    if (response.status === 401) {
+      throw new Error(
+        `FedaPay authentication failed (${response.status}): Check keys/env. ${errorMessage}`
+      );
+    }
+
     throw new Error(
-      `FedaPay API request failed (${response.status}): ${errorText}`
+      `FedaPay API request failed (${response.status}): ${errorMessage}`
     );
   }
 
-  return (await response.json()) as T;
+  // 4. On retourne les données
+  return data as T;
 }
 
-export async function createFedaPayTransaction(
-  payload: FedaPayTransactionPayload
-) {
-  return fedapayRequest<FedaPayTransactionResponse>("/transactions", {
+export async function createFedaPayTransaction(payload: FedaPayTransactionPayload) {
+  const data = await fedapayRequest<FedaPayResponseWrapper<"v1/transaction", FedaPayTransactionResponse>>("/transactions", {
     method: "POST",
     body: payload,
   });
-}
 
+  // Extraction de la transaction depuis la clé "v1/transaction"
+  const transaction = data["v1/transaction"];
+
+  // Maintenant transaction.id existera (ici ce serait 432454)
+  if (!transaction || !transaction.id) {
+    throw new Error(
+      `FedaPay did not return a valid transaction id: ${JSON.stringify(data)}`
+    );
+  }
+
+  return transaction as FedaPayTransactionResponse;
+}
 export async function createFedaPayPaymentLink(transactionId: string | number) {
   return fedapayRequest<FedaPayPaymentLinkResponse>(
     `/transactions/${transactionId}/token`,

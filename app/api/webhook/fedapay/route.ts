@@ -22,6 +22,14 @@ type FedaPayWebhookPayload = {
       group?: Group;
       eventId?: string;
     };
+    custom_metadata?: {
+      fullName?: string;
+      email?: string;
+      phone?: string;
+      color?: Color;
+      group?: Group;
+      eventId?: string;
+    };
   };
 };
 
@@ -39,7 +47,7 @@ export async function POST(req: Request) {
     }
 
     const transactionId = payload.entity?.id;
-    const metadata = payload.entity?.metadata;
+    const metadata = payload.entity?.metadata ?? payload.entity?.custom_metadata;
 
     if (!transactionId || !metadata) {
       return NextResponse.json(

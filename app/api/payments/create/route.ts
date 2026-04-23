@@ -11,7 +11,17 @@ import { checkAvailability, ensureEventExists } from "@/src/services/event.servi
 
 export const runtime = "nodejs";
 
+function splitFullName(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  const firstname = parts.shift() ?? fullName.trim();
+  const lastname = parts.length > 0 ? parts.join(" ") : firstname;
+
+  return { firstname, lastname };
+}
+
 export async function POST(req: Request) {
+  console.log("DATABASE_URL présente ?", !!process.env.DATABASE_URL);
+  console.log("FEDA_API_SECRET_KEY présente ?", !!process.env.FEDA_API_SECRET_KEY);
   try {
     const body = await req.json();
     const parsed = parseTicketPurchaseInput(body);
@@ -21,6 +31,7 @@ export async function POST(req: Request) {
     }
 
     const { eventId, fullName, email, phone, color, group } = parsed.data;
+    const { firstname, lastname } = splitFullName(fullName);
     const event = await ensureEventExists(eventId);
     const eventConfig = getEventConfig(eventId);
 
@@ -57,14 +68,15 @@ export async function POST(req: Request) {
       callback_url: buildConfirmationUrl(),
       currency: { iso: "XOF" },
       customer: {
-        firstname: fullName,
+        firstname,
+        lastname,
         email,
         phone_number: {
           number: phone,
           country: "BJ",
         },
       },
-      metadata: {
+      custom_metadata: {
         eventId,
         fullName,
         email,
@@ -73,6 +85,12 @@ export async function POST(req: Request) {
         group,
       },
     });
+
+    if (!transaction?.id) {
+      throw new Error(
+        `FedaPay did not return a valid transaction id: ${JSON.stringify(transaction)}`
+      );
+    }
 
     const paymentLink = await createFedaPayPaymentLink(transaction.id);
 

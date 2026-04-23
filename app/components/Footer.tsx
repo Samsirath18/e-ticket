@@ -11,6 +11,7 @@ export default function Footer() {
               src="/GO-ticket.png"
               alt="GO-TICKET"
               fill
+              sizes="128px"
               className="object-contain"
             />
           </div>
