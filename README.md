@@ -17,18 +17,24 @@ Copier `.env.example` vers `.env` puis renseigner au minimum:
 
 - `DATABASE_URL`
 - `QR_SECRET`
-- `FEDAPAY_API_KEY`
-- `FEDAPAY_ENV`
+- `FEDA_API_SECRET_KEY`
+- `FEDA_ENVIRONMENT`
+- `FEDA_CURRENCY_ISO`
 - `APP_URL`
 - `RESEND_API_KEY`
 - `EMAIL_FROM`
 
 Variables recommandees pour la securite:
 
-- `FEDAPAY_WEBHOOK_SECRET`
+- `FEDA_WEBHOOK_SECRET`
 - `CONTACT_TO`
 - `ADMIN_API_TOKEN`
 - `SCAN_API_TOKEN`
+
+Notes:
+
+- Le projet accepte aussi les anciennes variables `FEDAPAY_*` pour rester compatible avec l'ancienne configuration.
+- `FEDA_API_PUBLIC_KEY` peut etre renseignee des maintenant, meme si le flow actuel utilise le mode API serveur et non Checkout.js.
 
 ## Demarrage local
 
@@ -68,6 +74,7 @@ npm run dev
 - `/tickets/mode-avion` ouvre le tunnel d'achat
 - `/api/payments/create` cree une transaction FedaPay
 - `/api/webhook/fedapay` traite la confirmation de paiement
+- `/confirmation` reverifie le statut reel de la transaction a partir de son `id`
 - `/api/tickets/verify` verifie et consomme un QR code
 - `/api/admin/stats` statistiques admin
 - `/api/admin/tickets` liste admin des tickets
@@ -76,4 +83,5 @@ npm run dev
 
 - Les routes admin utilisent `ADMIN_API_TOKEN` via `Authorization: Bearer ...`
 - La route de scan utilise `SCAN_API_TOKEN` ou retombe sur `ADMIN_API_TOKEN`
-- En production, configure `FEDAPAY_WEBHOOK_SECRET` pour verifier la signature du webhook
+- En production, configure `FEDA_WEBHOOK_SECRET` pour verifier la signature du webhook
+- La page de retour ne se fie pas au `status` dans l'URL: elle demande a nouveau le statut reel a FedaPay avec l'identifiant de transaction

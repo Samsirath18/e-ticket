@@ -10,6 +10,18 @@ import { checkAvailability, ensureEventExists } from "@/src/services/event.servi
 
 export const runtime = "nodejs";
 
+const FAILURE_EVENTS = new Set([
+  "transaction.declined",
+  "transaction.canceled",
+]);
+
+function isSoldOutError(error: unknown) {
+  return (
+    error instanceof Error &&
+    ["EVENT_SOLD_OUT", "COLOR_SOLD_OUT", "GROUP_SOLD_OUT"].includes(error.message)
+  );
+}
+
 type FedaPayWebhookPayload = {
   name?: string;
   entity?: {
@@ -42,16 +54,45 @@ export async function POST(req: Request) {
       signature
     ) as FedaPayWebhookPayload;
 
+    const transactionId = payload.entity?.id;
+
+    if (!transactionId) {
+      return NextResponse.json(
+        { error: "Webhook payload incomplet." },
+        { status: 400 }
+      );
+    }
+
+    const payment = await prisma.payment.findUnique({
+      where: {
+        transactionId: String(transactionId),
+      },
+    });
+
+    if (!payment) {
+      return NextResponse.json({ error: "Paiement introuvable." }, { status: 404 });
+    }
+
+    if (FAILURE_EVENTS.has(payload.name ?? "")) {
+      if (payment.status !== "SUCCESS") {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: { status: "FAILED" },
+        });
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
     if (payload.name !== "transaction.approved") {
       return NextResponse.json({ received: true });
     }
 
-    const transactionId = payload.entity?.id;
     const metadata = payload.entity?.metadata ?? payload.entity?.custom_metadata;
 
-    if (!transactionId || !metadata) {
+    if (!metadata) {
       return NextResponse.json(
-        { error: "Webhook payload incomplet." },
+        { error: "Metadata ticket manquante." },
         { status: 400 }
       );
     }
@@ -72,16 +113,6 @@ export async function POST(req: Request) {
         { error: "Metadata ticket invalide." },
         { status: 400 }
       );
-    }
-
-    const payment = await prisma.payment.findUnique({
-      where: {
-        transactionId: String(transactionId),
-      },
-    });
-
-    if (!payment) {
-      return NextResponse.json({ error: "Paiement introuvable." }, { status: 404 });
     }
 
     if (payment.status === "SUCCESS") {
@@ -117,56 +148,74 @@ export async function POST(req: Request) {
       );
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      const total = await tx.ticket.count({
-        where: { eventId },
-      });
+    let result: { ticket: { id: string }; qrImage: string };
 
-      if (total >= event.totalTickets) {
-        throw new Error("EVENT_SOLD_OUT");
+    try {
+      result = await prisma.$transaction(async (tx) => {
+        const total = await tx.ticket.count({
+          where: { eventId },
+        });
+
+        if (total >= event.totalTickets) {
+          throw new Error("EVENT_SOLD_OUT");
+        }
+
+        const colorCount = await tx.ticket.count({
+          where: { eventId, color },
+        });
+
+        if (colorCount >= eventConfig.maxPerColor) {
+          throw new Error("COLOR_SOLD_OUT");
+        }
+
+        const groupCount = await tx.ticket.count({
+          where: { eventId, group },
+        });
+
+        if (groupCount >= eventConfig.maxPerGroup) {
+          throw new Error("GROUP_SOLD_OUT");
+        }
+
+        const uuid = uuidv4();
+        const payload = generateQRPayload(uuid, eventId);
+        const qrImage = await generateQRCodeImage(payload.token);
+
+        const ticket = await tx.ticket.create({
+          data: {
+            uuid,
+            qrSignature: payload.token,
+            fullName,
+            email,
+            phone,
+            color,
+            group,
+            eventId,
+            paymentId: payment.id,
+          },
+        });
+
+        await tx.payment.update({
+          where: { id: payment.id },
+          data: { status: "SUCCESS" },
+        });
+
+        return { ticket, qrImage };
+      });
+    } catch (transactionError) {
+      if (isSoldOutError(transactionError)) {
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: { status: "FAILED" },
+        });
+
+        return NextResponse.json(
+          { error: "Paiement recu mais plus de disponibilite pour ce billet." },
+          { status: 409 }
+        );
       }
 
-      const colorCount = await tx.ticket.count({
-        where: { eventId, color },
-      });
-
-      if (colorCount >= eventConfig.maxPerColor) {
-        throw new Error("COLOR_SOLD_OUT");
-      }
-
-      const groupCount = await tx.ticket.count({
-        where: { eventId, group },
-      });
-
-      if (groupCount >= eventConfig.maxPerGroup) {
-        throw new Error("GROUP_SOLD_OUT");
-      }
-
-      const uuid = uuidv4();
-      const payload = generateQRPayload(uuid, eventId);
-      const qrImage = await generateQRCodeImage(payload.token);
-
-      const ticket = await tx.ticket.create({
-        data: {
-          uuid,
-          qrSignature: payload.token,
-          fullName,
-          email,
-          phone,
-          color,
-          group,
-          eventId,
-          paymentId: payment.id,
-        },
-      });
-
-      await tx.payment.update({
-        where: { id: payment.id },
-        data: { status: "SUCCESS" },
-      });
-
-      return { ticket, qrImage };
-    });
+      throw transactionError;
+    }
 
     try {
       await sendTicketEmail({

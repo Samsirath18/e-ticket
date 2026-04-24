@@ -1,10 +1,23 @@
 import { NextResponse } from "next/server";
 import { sendContactEmail } from "@/src/lib/email";
+import { checkRateLimit } from "@/src/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    const rateLimit = checkRateLimit(req, "contact", {
+      limit: 5,
+      windowMs: 10 * 60 * 1000,
+    });
+
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { message: "Trop de tentatives. Reessayez dans quelques minutes." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const name = typeof body?.name === "string" ? body.name.trim() : "";
     const email = typeof body?.email === "string" ? body.email.trim() : "";

@@ -158,12 +158,16 @@ export default function BuyTicketPage() {
             <input
               type="tel"
               name="phone"
-              placeholder="Telephone"
+              placeholder="Telephone (+229...)"
               value={form.phone}
               onChange={handleChange}
               className="w-full rounded-xl border border-white/30 bg-transparent p-3 placeholder-gray-300 focus:border-yellow-400 focus:outline-none"
               required
             />
+
+            <p className="-mt-2 text-xs text-gray-300">
+              Utilisez si possible votre numero avec l&apos;indicatif pays.
+            </p>
 
             <select
               name="color"
