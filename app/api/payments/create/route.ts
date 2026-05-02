@@ -159,11 +159,25 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Payment creation failed:", error);
 
-    if (error instanceof FedaPayApiError && error.status === 401) {
+    if (error instanceof FedaPayApiError) {
+      console.error("FedaPay payment creation failed:", {
+        status: error.status,
+        body: error.body,
+      });
+
+      if (error.status === 401) {
+        return NextResponse.json(
+          {
+            message:
+              "Echec d'authentification FedaPay. Verifiez FEDA_API_SECRET_KEY et FEDA_ENVIRONMENT.",
+          },
+          { status: 502 }
+        );
+      }
+
       return NextResponse.json(
         {
-          message:
-            "Echec d'authentification FedaPay. Verifiez FEDA_API_SECRET_KEY et FEDA_ENVIRONMENT.",
+          message: "FedaPay a refuse la creation du paiement.",
         },
         { status: 502 }
       );
