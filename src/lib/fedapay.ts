@@ -271,10 +271,46 @@ export async function getFedaPayTransaction(transactionId: string | number) {
   return normalizeTransactionResponse(response, transactionId);
 }
 
+function withProtocol(value: string) {
+  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+}
+
+function getBaseUrl(value?: string) {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(withProtocol(value.trim()));
+    return url.origin;
+  } catch {
+    return undefined;
+  }
+}
+
+function isLocalhostUrl(value: string) {
+  const hostname = new URL(value).hostname;
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+}
+
 export function buildConfirmationUrl(requestUrl?: string) {
-  const appUrl =
-    process.env.APP_URL?.trim() || process.env.NEXT_PUBLIC_APP_URL?.trim();
-  const baseUrl = appUrl || requestUrl;
+  const candidates = [
+    process.env.APP_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    requestUrl,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+  ];
+
+  const baseUrl = candidates
+    .map(getBaseUrl)
+    .find((candidate) => {
+      if (!candidate) {
+        return false;
+      }
+
+      return process.env.NODE_ENV !== "production" || !isLocalhostUrl(candidate);
+    });
 
   if (!baseUrl) {
     return undefined;
